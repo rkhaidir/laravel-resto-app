@@ -61,6 +61,10 @@
           </tbody>
         </table>
       </div>
+      
+      <div class="mt-10">
+        {{ $tables->links() }}
+      </div>
     </div>
   </div>
 </x-admin-layout>

@@ -6,6 +6,6 @@
   </x-slot>
   
   <div class="py-12">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Welcome Administrator</h2>
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Welcome {{ auth()->user()->name }}</h2>
   </div>
 </x-admin-layout>

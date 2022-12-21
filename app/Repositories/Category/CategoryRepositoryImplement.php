@@ -21,12 +21,12 @@ class CategoryRepositoryImplement extends Eloquent implements CategoryRepository
 
     public function getCategories()
     {
-        return $this->model->all();
+        return $this->model->latest()->get();
     }
 
     public function getCategoryPaginate($paginate)
     {
-        return $this->model->paginate($paginate);
+        return $this->model->latest()->paginate($paginate);
     }
 
     public function createCategory(array $newCategory)

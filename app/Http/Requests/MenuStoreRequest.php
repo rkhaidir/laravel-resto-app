@@ -27,7 +27,7 @@ class MenuStoreRequest extends FormRequest
           'name'        => ['required'],  
           'description' => ['required'],  
           'price'       => ['required'],  
-          'image'       => ['required', 'image'],  
+          'image'       => ['required', 'image', 'mimes:jpg,jpeg,png'],  
         ];
     }
 }

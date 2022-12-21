@@ -5,12 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MenuStoreRequest;
 use App\Models\Category;
-use App\Models\Menu;
+use App\Services\Menu\MenuService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
+    private $menuService;
+
+    public function __construct(MenuService $menuService)
+    {
+        $this->menuService = $menuService;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -18,9 +23,8 @@ class MenuController extends Controller
      */
     public function index()
     {
-        $menus = Menu::paginate(4);
         return view('admin.menus.index', [
-            'menus' => $menus
+            'menus' => $this->menuService->getMenuAdminPaginate()
         ]);
     }
 
@@ -45,18 +49,7 @@ class MenuController extends Controller
      */
     public function store(MenuStoreRequest $request)
     {
-        $image = $request->file('image')->store('public/menus');
-        $menu = Menu::create([
-            'name'          => $request->name,
-            'description'   => $request->description,
-            'image'         => $image,
-            'price'         => $request->price
-        ]);
-
-        if($request->has('categories')) {
-            $menu->categories()->attach($request->categories);
-        }
-
+        $this->menuService->createMenu($request);
         return to_route('admin.menus.index')->with('success', 'Menu created successfully');
     }
 
@@ -77,11 +70,11 @@ class MenuController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Menu $menu)
+    public function edit($id)
     {
         $categories = Category::all();
         return view('admin.menus.edit', [
-            'menu'          => $menu,
+            'menu'          => $this->menuService->getMenuById($id),
             'categories'    => $categories
         ]);
     }
@@ -93,23 +86,9 @@ class MenuController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Menu $menu)
+    public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'name' => 'required',
-            'description' => 'required',
-            'price' => 'required'
-        ]);
-        if ($request->hasFile('image')) {
-            Storage::delete($menu->image);
-            $validatedData['image'] = $request->file('image')->store('public/menus');
-        }
-        $menu->update($validatedData);
-
-        if($request->has('categories')) {
-            $menu->categories()->sync($request->categories);
-        }
-
+        $this->menuService->updateMenu($id, $request);
         return to_route('admin.menus.index')->with('success', 'Menu updated successfully');
     }
 
@@ -119,11 +98,9 @@ class MenuController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Menu $menu)
+    public function destroy($id)
     {
-        Storage::delete($menu->image);
-        $menu->categories()->detach();
-        $menu->delete();
+        $this->menuService->deleteMenu($id);
         return to_route('admin.menus.index')->with('success', 'Menu deleted successfully');
     }
 }
